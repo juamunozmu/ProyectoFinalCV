@@ -1,0 +1,207 @@
+/* --- COLORS & VARIABLES --- */
+:root {
+    --col-bg-main: rgb(243, 245, 249);
+    --col-sidebar: rgb(24, 27, 40);
+    --col-card: rgb(255, 255, 255);
+    --col-text-main: rgb(30, 30, 30);
+    --col-text-sub: rgb(100, 100, 100); /* Darker for better contrast */
+    --col-accent: rgb(255, 107, 74);
+    --col-highlight: rgb(0, 122, 255);
+}
+
+/* --- LAYOUT --- */
+.root-container {
+    flex-grow: 1;
+    background-color: var(--col-bg-main);
+    flex-direction: column;
+    /* BASE FONT SIZE INCREASED (Was 14px) */
+    font-size: 18px; 
+}
+
+.content-area {
+    flex-grow: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+/* --- ANIMATED VIEW STYLES --- */
+.app-view {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    padding-bottom: 120px; /* Increased padding for larger menu */
+    background-color: var(--col-bg-main);
+    
+    opacity: 0;
+    translate: 40px 0;
+    
+    transition-property: opacity, translate;
+    transition-duration: 0.4s;
+    transition-timing-function: ease-out-cubic;
+    
+    display: flex;
+    pointer-events: none; 
+}
+
+.view-active {
+    opacity: 1;
+    translate: 0 0;
+    pointer-events: auto;
+}
+
+/* --- BOTTOM MENU --- */
+.menu-bar {
+    flex-direction: row;
+    height: 100px; /* Taller bar to fit larger text */
+    background-color: var(--col-sidebar);
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+    padding: 15px;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.menu-btn {
+    background-color: transparent;
+    border-width: 0;
+    color: rgb(150, 150, 160);
+    
+    /* MENU TEXT BIGGER (Was 12px) */
+    font-size: 16px; 
+    
+    -unity-font-style: bold;
+    height: 100%;
+    padding: 10px 25px;
+    border-radius: 16px;
+    transition: color 0.2s, background-color 0.2s;
+}
+
+.menu-btn.active {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* --- DASHBOARD CONTENT STYLES --- */
+.padding-container { padding: 35px; }
+
+.header-title {
+    /* HEADER HUGE (Was 28px) */
+    font-size: 40px; 
+    -unity-font-style: bold;
+    color: var(--col-sidebar);
+    margin-bottom: 10px;
+    white-space: normal; /* Allows wrapping if text is too big */
+}
+
+.header-subtitle {
+    font-size: 20px; /* Was 16px */
+    color: var(--col-text-sub);
+    margin-bottom: 30px;
+}
+
+.card {
+    background-color: var(--col-card);
+    border-radius: 28px;
+    padding: 25px;
+    margin-bottom: 25px;
+    border-bottom-width: 3px;
+    border-color: rgba(0,0,0,0.05);
+}
+
+.card-title {
+    font-size: 24px; /* Was 18px */
+    -unity-font-style: bold;
+    color: var(--col-sidebar);
+    margin-bottom: 15px;
+}
+
+/* Specific Element Styling */
+.media-placeholder {
+    height: 200px; /* Taller image area */
+    background-color: #F0F2F5;
+    border-radius: 20px;
+    justify-content: center;
+    align-items: center;
+}
+
+.list-item {
+    background-color: white;
+    border-width: 1px;
+    border-color: #EEE;
+    border-radius: 16px;
+    margin-bottom: 12px;
+    padding: 20px; /* Larger hit area */
+    
+    font-size: 20px; /* Was default */
+    
+    color: var(--col-text-main);
+    -unity-text-align: middle-left;
+}
+
+.lesson-btn {
+    background-color: var(--col-card);
+    border-width: 0;
+    border-radius: 20px;
+    padding: 25px;
+    margin-bottom: 15px;
+    
+    font-size: 22px; /* Was 16px */
+    
+    -unity-font-style: bold;
+    color: var(--col-sidebar);
+}
+
+.practice-btn {
+    background-color: var(--col-highlight);
+    color: white;
+    border-radius: 16px;
+    padding: 18px 40px;
+    
+    font-size: 20px; /* Was 16px */
+    
+    -unity-font-style: bold;
+    border-width: 0;
+}
+
+.tag-accent {
+    color: var(--col-accent);
+    font-size: 18px; /* Was 12px */
+    -unity-font-style: bold;
+}
+
+.unity-scroller--vertical {
+    width: 12px; /* Make it thin */
+    background-color: transparent;
+    border: none;
+    margin: 5px 5px 5px 0px; /* Add some spacing from edges */
+}
+
+/* 2. Hide the default top/bottom arrow buttons */
+.unity-scroller__low-button,
+.unity-scroller__high-button {
+    display: none;
+}
+
+/* 3. The track (background area behind the thumb) */
+.unity-base-slider__tracker {
+    background-color: rgba(0, 0, 0, 0.1); /* Very subtle grey track */
+    border-color: transparent;
+    border-radius: 6px; /* Perfectly round corners based on width */
+}
+
+/* 4. The draggable thumb (the handle) */
+.unity-base-slider__dragger {
+    background-color: var(--col-scrollbar-thumb); /* A neutral grey-blue */
+    border-color: transparent;
+    border-radius: 6px; /* Perfectly round corners */
+    
+    /* Optional: Make thumb slightly smaller than track for a floating look */
+    margin-left: 2px; 
+    margin-right: 2px;
+    width: 8px;
+}
+
+/* Hover state for the thumb */
+.unity-base-slider__dragger:hover {
+    background-color: rgb(150, 155, 170); /* Slightly darker on hover */
+}

@@ -1,0 +1,53 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/menu/StyleSheet.uss?fileID=7433441132597879392&amp;guid=09a52e9638c4675faa15ce40998f142b&amp;type=3#StyleSheet"/>
+    <ui:VisualElement name="Root" class="root-container">
+        <ui:VisualElement name="ContentArea" class="content-area">
+            <ui:ScrollView name="View_Home" class="app-view view-active">
+                <ui:VisualElement class="padding-container">
+                    <ui:Label text="Hola, que deseas aprender hoy?" class="header-title"/>
+                    <ui:VisualElement class="card">
+                        <ui:Label text="SE&#209;A DEL D&#205;A" class="card-title"/>
+                        <ui:VisualElement class="media-placeholder">
+                            <ui:Label text="[ 3D MODEL ]" style="color: rgb(150, 150, 150);"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement style="flex-direction: row; justify-content: flex-end; margin-top: 10px;">
+                            <ui:Label text="Today" class="tag-accent"/>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:ScrollView>
+            <ui:ScrollView name="View_Dictionary" class="app-view">
+                <ui:VisualElement class="padding-container">
+                    <ui:Label text="Dictionario" class="header-title"/>
+                    <ui:VisualElement class="card">
+                        <ui:Label text="Abecedario" class="card-title"/>
+                        <ui:Button text="Letra A" class="list-item"/>
+                        <ui:Button text="Letra B" class="list-item"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:ScrollView>
+            <ui:ScrollView name="View_Lessons" class="app-view">
+                <ui:VisualElement class="padding-container">
+                    <ui:Label text="Lecciones" class="header-title"/>
+                    <ui:Button text="1. Saludos" class="lesson-btn"/>
+                    <ui:Button text="2. Familia" class="lesson-btn"/>
+                </ui:VisualElement>
+            </ui:ScrollView>
+            <ui:ScrollView name="View_Practice" class="app-view">
+                <ui:VisualElement class="padding-container">
+                    <ui:Label text="Practicar" class="header-title"/>
+                    <ui:VisualElement class="card" style="align-items: center; padding: 40px;">
+                        <ui:Label text="Ready to start?" class="card-title"/>
+                        <ui:Button text="Start Matching" class="practice-btn"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:ScrollView>
+        </ui:VisualElement>
+        <ui:VisualElement name="BottomMenuBar" class="menu-bar">
+            <ui:Button name="Btn_Home" text="HOME" class="menu-btn active"/>
+            <ui:Button name="Btn_Dictionary" text="DICTIONARIO" class="menu-btn"/>
+            <ui:Button name="Btn_Lessons" text="LECCIONES" class="menu-btn"/>
+            <ui:Button name="Btn_Practice" text="PRACTICAR" class="menu-btn"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
