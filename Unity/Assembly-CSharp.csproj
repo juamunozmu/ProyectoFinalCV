@@ -48,12 +48,28 @@
     <Analyzer Include="/home/Felipe/Unity/Hub/Editor/6000.3.0f1/Editor/Data/Tools/BuildPipeline/Unity.SourceGenerators/Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets/menu/TabbedMenu.cs" />
+    <Compile Include="Assets/Scenes/Juegos/MatchGameController.cs" />
+    <Compile Include="Assets/Scenes/Lecciones/OpenCVconnector.cs" />
+    <Compile Include="Assets/Scenes/Diccionarios/Diccionario.cs" />
+    <Compile Include="Assets/Scenes/Lecciones/LeccionLetras/LessonLetrasController.cs" />
+    <Compile Include="Assets/Scenes/Lecciones/HandMath.cs" />
     <Compile Include="Assets/TutorialInfo/Scripts/Readme.cs" />
+    <Compile Include="Assets/Scenes/menu/3DVisualizer.cs" />
+    <Compile Include="Assets/Scenes/menu/DictionaryScripts/DictionaryBridge.cs" />
+    <Compile Include="Assets/Scenes/menu/SceneNav.cs" />
+    <Compile Include="Assets/Resources/Gestures/SignData.cs" />
+    <Compile Include="Assets/Scenes/menu/CustomMenuController.cs" />
+    <Compile Include="Assets/Scenes/menu/DictionaryScripts/DictionaryLoader.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Assets/menu/MainFormMenu.uxml" />
-    <None Include="Assets/menu/StyleSheet.uss" />
+    <None Include="Assets/Scenes/Diccionarios/LetrasDic.uxml" />
+    <None Include="Assets/Scenes/menu/MainFormMenu.uxml" />
+    <None Include="Assets/Scenes/menu/StyleSheet.uss" />
+    <None Include="Assets/Scenes/Juegos/MatchGame.uxml" />
+    <None Include="Assets/Scenes/Lecciones/LessonStyle.uss" />
+    <None Include="Assets/Scenes/Diccionarios/DiccionarioStyle.uss" />
+    <None Include="Assets/Scenes/Juegos/GameStyle.uss" />
+    <None Include="Assets/Scenes/Lecciones/LeccionLetras/MenuLecLetras.uxml" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

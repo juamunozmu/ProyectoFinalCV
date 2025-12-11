@@ -6,8 +6,17 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
-    guid: 99c9720ab356a0642a771bea13969a05
+    path: Assets/Scenes/menu/MenuScene.unity
+    guid: 3d6796e38294a7f7d8b1fc9d8700e7a7
+  - enabled: 1
+    path: Assets/Scenes/Juegos/GameParejas.unity
+    guid: fca12fc84b5c9ec9aa2bab54fdb48ef9
+  - enabled: 1
+    path: Assets/Scenes/Diccionarios/DiccionarioScene.unity
+    guid: c1089c34722bee533887fe4e7a5cdaaa
+  - enabled: 1
+    path: Assets/Scenes/Lecciones/LeccionLetras/LecLetras.unity
+    guid: ae433bdab670c336a926b2e03b91f659
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

@@ -117,11 +117,13 @@
 
 /* Specific Element Styling */
 .media-placeholder {
-    height: 200px; /* Taller image area */
+    width: 100%;       /* Ensure it tries to fill width */
     background-color: #F0F2F5;
     border-radius: 20px;
     justify-content: center;
     align-items: center;
+    overflow: hidden;
+
 }
 
 .list-item {
@@ -204,4 +206,74 @@
 /* Hover state for the thumb */
 .unity-base-slider__dragger:hover {
     background-color: rgb(150, 155, 170); /* Slightly darker on hover */
+}
+
+.model-preview-image {
+    width: 100%;
+    height: 100%;
+    border-radius: 20px; /* Match the placeholder radius */
+    -unity-background-scale-mode: scale-to-fit; /* Keeps aspect ratio */
+}
+
+/* 1. Setup Smooth Transitions for all buttons first */
+.list-item,
+.lesson-btn,
+.practice-btn {
+    transition-property: scale, background-color, translate;
+    transition-duration: 0.1s; /* Very fast snap for responsiveness */
+    transition-timing-function: ease-out;
+}
+
+/* 2. Dictionary Items (White List Style) */
+.list-item:active {
+    scale: 0.98; /* Shrinks to 98% size */
+    background-color: rgb(240, 240, 245); /* Dims slightly */
+}
+
+/* 3. Lesson Buttons (Grey/Card Style) */
+.lesson-btn:active {
+    scale: 0.98;
+    background-color: rgb(230, 230, 230); /* Dims slightly */
+}
+
+/* 4. Practice Button (The Big Blue Button) */
+.practice-btn:hover {
+    /* Optional: Brighten slightly when hovering (mouse users) */
+    background-color: rgb(20, 142, 255); 
+}
+
+.practice-btn:active {
+    scale: 0.95; /* Deeper press effect */
+    translate: 0 2px; /* Physically moves down 2 pixels */
+    background-color: rgb(0, 90, 200); /* Darker blue */
+}
+
+/* 5. Bottom Menu Buttons */
+/* These already have an .active class from C#, but this handles the 'Press' moment */
+.menu-btn:active {
+    opacity: 0.7;
+    scale: 0.9;
+}
+
+/* --- SEARCH BAR --- */
+.search-bar {
+    height: 60px;
+    margin-bottom: 25px;
+    font-size: 20px;
+}
+
+/* This targets the internal input box of the Unity TextField */
+.search-bar > .unity-base-text-field__input {
+    background-color: white;
+    border-radius: 30px; /* Fully rounded pill shape */
+    border-width: 0;
+    padding-left: 25px;
+    padding-right: 25px;
+    color: rgb(30, 30, 30);
+    -unity-font-style: bold;
+}
+
+/* Optional: Change placeholder color (requires Unity 2022+) */
+.search-bar > .unity-base-text-field__input--placeholder {
+    color: rgb(180, 180, 180);
 }

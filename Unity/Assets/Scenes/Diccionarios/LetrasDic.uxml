@@ -1,0 +1,21 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/Scenes/Diccionarios/DiccionarioStyle.uss?fileID=7433441132597879392&amp;guid=6cf388e76bbf55e00a870f2211ffecfb&amp;type=3#DiccionarioStyle"/>
+    <ui:VisualElement name="Root" class="detail-root">
+        <ui:VisualElement class="nav-bar" style="align-content: flex-start; align-items: center; justify-content: center; align-self: stretch; flex-direction: column;">
+            <ui:Label name="Lbl_Title" text="ITEM NAME" class="nav-title" style="-unity-text-align: upper-center;"/>
+            <ui:VisualElement style="width: 80px;"/>
+        </ui:VisualElement>
+        <ui:VisualElement class="viewport-container">
+            <ui:Image name="Model3D_View" picking-mode="Position" class="viewport-image"/>
+        </ui:VisualElement>
+        <ui:VisualElement class="info-panel">
+            <ui:ScrollView>
+                <ui:Label text="Descripci&#243;n" class="info-header"/>
+                <ui:Label name="Lbl_Description" text="Aqu&#237; va la descripci&#243;n detallada del objeto. Este texto explica el significado, uso y contexto del modelo 3D que se muestra arriba." class="info-body"/>
+            </ui:ScrollView>
+        </ui:VisualElement>
+        <ui:VisualElement class="bottom-bar">
+            <ui:Button name="Btn_Home" text="IR AL MENU PRINCIPAL" class="action-btn"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

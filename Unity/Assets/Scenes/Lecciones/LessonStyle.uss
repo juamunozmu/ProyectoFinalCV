@@ -1,0 +1,227 @@
+/* --- COLORS & VARIABLES (Inherited from Main Menu style) --- */
+:root {
+    --col-bg-main: rgb(243, 245, 249);
+    --col-sidebar: rgb(24, 27, 40);
+    --col-card: rgb(255, 255, 255);
+    --col-accent: rgb(255, 107, 74);
+    --col-highlight: rgb(0, 122, 255);
+}
+
+/* --- MAIN LAYOUT --- */
+.root-container {
+    flex-grow: 1;
+    background-color: var(--col-bg-main);
+    flex-direction: column;
+    font-size: 18px;
+    overflow: hidden; /* Critical for sliding menu */
+}
+
+
+/* --- GAMEPLAY STACK (Vertical) --- */
+.gameplay-stack {
+    flex-grow: 1;
+    flex-direction: column;
+    padding: 20px;
+    padding-right: 20px; 
+}
+
+/* SECTION 1: WEBCAM (Strict 1/3 of Screen) */
+.webcam-section {
+    height: 33.33%;  /* Exact 1/3 height */
+    flex-grow: 0;    /* Stop it from stretching */
+    
+    background-color: black;
+    border-radius: 28px;
+    margin-bottom: 15px;
+    overflow: hidden;
+    border-width: 4px;
+    border-color: rgba(0,0,0,0.05);
+    align-items: center;
+    justify-content: center;
+}
+
+/* SECTION 2: 3D GUIDE (Strict 40% of Screen) */
+.guide-section {
+    height: 40%;     /* Exact 40% height */
+    flex-grow: 0;    /* Stop it from stretching */
+    
+    background-color: var(--col-card);
+    border-radius: 28px;
+    margin-bottom: 15px;
+    overflow: hidden;
+    border-width: 4px;
+    border-color: rgba(0,0,0,0.05);
+}
+
+.guide-image {
+    width: 100%;
+    height: 100%;
+    /* Ensure the image fits inside the 40% box without stretching/distortion */
+    -unity-background-scale-mode: scale-to-fit; 
+}
+
+/* SECTION 3: INFO (Fills the Remaining Space ~26%) */
+.info-section {
+    flex-grow: 1;    /* Takes whatever vertical space is left */
+    
+    background-color: var(--col-sidebar);
+    border-radius: 28px;
+    padding: 10px;   /* Slightly reduced padding to fit content */
+    justify-content: center;
+    align-items: center;
+}
+
+.info-title {
+    color: rgb(150, 150, 160);
+    font-size: 20px;
+    -unity-font-style: bold;
+    margin-bottom: 5px;
+}
+
+.info-feedback {
+    color: white;
+    font-size: 28px; /* Slightly smaller to fit */
+    -unity-font-style: bold;
+    margin-bottom: 10px;
+}
+
+/* PROGRESS BAR */
+.progress-bar-bg {
+    width: 90%;
+    height: 10px;
+    background-color: rgba(255,255,255,0.1);
+    border-radius: 5px;
+}
+
+.progress-fill {
+    width: 0%;
+    height: 100%;
+    background-color: rgb(46, 204, 113);
+    border-radius: 5px;
+    transition: width 0.2s ease-out;
+}
+
+/* --- OVERLAY (Click Catcher) --- */
+.menu-overlay {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0,0,0,0.01); /* Invisible but blocks clicks to game */
+}
+
+.overlay-hidden {
+    display: none;
+}
+
+/* --- SIDEBAR DRAWER --- */
+.sidebar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 350px; /* Covers partial screen */
+    background-color: var(--col-sidebar);
+    padding: 25px;
+    padding-top: 100px; /* Space for toggle button */
+    
+    /* SHADOW & BORDER */
+    border-left-width: 1px;
+    border-left-color: rgba(255,255,255,0.1);
+    
+    /* ANIMATION */
+    transition-property: translate;
+    transition-duration: 0.35s;
+    transition-timing-function: ease-out-cubic;
+}
+
+.sidebar-closed {
+    translate: 100% 0; /* Push completely right */
+}
+
+.sidebar-open {
+    translate: 0 0;
+}
+
+/* --- SIDEBAR LIST ITEMS --- */
+.sidebar-item {
+    /* White Card Style */
+    background-color: white; 
+    color: rgb(30, 30, 30); /* Dark text for contrast */
+    
+    border-width: 0;
+    border-radius: 16px;
+    
+    /* Typography */
+    font-size: 20px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-left;
+    
+    /* Spacing */
+    padding: 20px;
+    margin-bottom: 12px; /* Spacing between buttons */
+    
+    /* Animation */
+    transition: scale 0.1s, background-color 0.1s;
+}
+
+/* Hover State */
+.sidebar-item:hover {
+    background-color: rgb(230, 230, 235); /* Light grey on hover */
+}
+
+/* Active/Click State */
+.sidebar-item:active {
+    scale: 0.98;
+}
+
+/* --- FLOATING BUTTONS --- */
+
+/* 1. HAMBURGER MENU (Now White) */
+.menu-toggle-btn {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    width: 65px;
+    height: 65px;
+    border-radius: 20px; 
+    
+    /* STYLE SWAP: White Background, Dark Icon */
+    background-color: white;
+    color: var(--col-sidebar);
+    
+    font-size: 32px;
+    -unity-font-style: bold;
+    border-width: 0;
+    transition: scale 0.1s, background-color 0.1s;
+}
+
+.menu-toggle-btn:active { 
+    scale: 0.9; 
+    background-color: rgb(220, 220, 230); /* Slight dim on press */
+}
+
+/* 2. EXIT BUTTON (Now Red) */
+.back-btn-floating {
+    position: absolute;
+    top: 25px;
+    left: 25px;
+    
+    /* STYLE SWAP: Red Background, White Text */
+    background-color: var(--col-accent); /* rgb(255, 107, 74) */
+    color: white;
+    
+    border-radius: 16px;
+    border-width: 0;
+    padding: 15px 30px;
+    font-size: 18px;
+    -unity-font-style: bold;
+
+    transition: scale 0.1s, background-color 0.1s;
+}
+
+.back-btn-floating:active {
+    scale: 0.95; 
+    background-color: rgb(230, 70, 40); /* Darker red on press */
+}

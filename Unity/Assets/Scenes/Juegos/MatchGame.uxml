@@ -1,0 +1,44 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="GameStyle.uss"/>
+
+    <ui:VisualElement name="Root" class="game-root">
+        
+        <ui:VisualElement class="top-bar">
+            <ui:Button name="Btn_Exit" text="SALIR" class="exit-btn"/>
+            <ui:Label name="Lbl_Feedback" text="Arrastra las palabras..." class="feedback-text"/>
+        </ui:VisualElement>
+
+        <ui:VisualElement class="grid-container">
+            <ui:VisualElement class="grid-row">
+                <ui:VisualElement name="Slot_0" class="slot-container">
+                    <ui:Image class="slot-image" picking-mode="Position"/> 
+                    <ui:Label text="?" class="slot-placeholder"/>
+                </ui:VisualElement>
+                <ui:VisualElement name="Slot_1" class="slot-container">
+                    <ui:Image class="slot-image" picking-mode="Position"/>
+                    <ui:Label text="?" class="slot-placeholder"/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="grid-row">
+                <ui:VisualElement name="Slot_2" class="slot-container">
+                    <ui:Image class="slot-image" picking-mode="Position"/>
+                    <ui:Label text="?" class="slot-placeholder"/>
+                </ui:VisualElement>
+                <ui:VisualElement name="Slot_3" class="slot-container">
+                    <ui:Image class="slot-image" picking-mode="Position"/>
+                    <ui:Label text="?" class="slot-placeholder"/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="WordBank" class="word-bank">
+            <ui:Label name="Drag_0" text="Word A" class="draggable-item"/>
+            <ui:Label name="Drag_1" text="Word B" class="draggable-item"/>
+            <ui:Label name="Drag_2" text="Word C" class="draggable-item"/>
+            <ui:Label name="Drag_3" text="Word D" class="draggable-item"/>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="DragLayer" picking-mode="Ignore" style="position: absolute; width: 100%; height: 100%;"/>
+
+    </ui:VisualElement>
+</ui:UXML>
