@@ -35,6 +35,9 @@ from typing import Optional, Tuple, List
 UDP_IP = "127.0.0.1"
 UDP_PORT = 5005
 
+# Streaming de video (JPEG) a Unity
+UDP_VIDEO_PORT = 5006
+
 # Configuración de MediaPipe
 MAX_NUM_HANDS = 1
 MIN_DETECTION_CONFIDENCE = 0.7
@@ -64,6 +67,10 @@ class HandTracker:
                  model_path: str = MODEL_PATH,
                  udp_ip: str = UDP_IP, 
                  udp_port: int = UDP_PORT,
+                 udp_video_port: Optional[int] = UDP_VIDEO_PORT,
+                 video_fps: float = 10.0,
+                 video_width: int = 320,
+                 video_jpeg_quality: int = 55,
                  camera_id: int = 0,
                  mirror_mode: bool = True,
                  show_window: bool = True):
@@ -81,6 +88,10 @@ class HandTracker:
         self.model_path = model_path
         self.udp_ip = udp_ip
         self.udp_port = udp_port
+        self.udp_video_port = udp_video_port
+        self.video_fps = float(video_fps)
+        self.video_width = int(video_width)
+        self.video_jpeg_quality = int(video_jpeg_quality)
         self.camera_id = camera_id
         self.mirror_mode = mirror_mode
         self.show_window = show_window
@@ -90,6 +101,9 @@ class HandTracker:
         self.current_letter = ""
         self.confidence = 0.0
         self.fps = 0.0
+
+        # Video streaming state
+        self._last_video_send_time = 0.0
         
         # Inicializar componentes
         self._init_mediapipe()
@@ -268,6 +282,42 @@ class HandTracker:
             self.sock.sendto(message.encode('utf-8'), (self.udp_ip, self.udp_port))
         except Exception as e:
             print(f"[ERROR] Error enviando UDP: {e}")
+
+    def _send_video_frame_to_unity(self, frame_bgr: np.ndarray):
+        """Envía un frame JPEG (como bytes) vía UDP a Unity en un puerto separado.
+
+        Nota: UDP tiene límite de tamaño por datagrama (~65KB). Por eso se manda
+        un frame reducido y con calidad moderada.
+        """
+        if self.udp_video_port is None:
+            return
+
+        now = time.time()
+        if self.video_fps > 0 and (now - self._last_video_send_time) < (1.0 / self.video_fps):
+            return
+
+        try:
+            frame = frame_bgr
+            if self.video_width > 0 and frame.shape[1] > self.video_width:
+                scale = self.video_width / float(frame.shape[1])
+                new_h = max(1, int(frame.shape[0] * scale))
+                frame = cv2.resize(frame, (self.video_width, new_h), interpolation=cv2.INTER_AREA)
+
+            encode_params = [int(cv2.IMWRITE_JPEG_QUALITY), int(np.clip(self.video_jpeg_quality, 10, 95))]
+            ok, buf = cv2.imencode('.jpg', frame, encode_params)
+            if not ok:
+                return
+
+            payload = buf.tobytes()
+            # Avoid sending oversized UDP packets
+            if len(payload) > 65000:
+                return
+
+            self.sock.sendto(payload, (self.udp_ip, self.udp_video_port))
+            self._last_video_send_time = now
+        except Exception:
+            # Silencioso: si el video falla, no queremos romper la detección
+            return
     
     def draw_overlay(self, frame: np.ndarray, hand_landmarks, 
                      letter: str, confidence: float) -> np.ndarray:
@@ -405,6 +455,12 @@ class HandTracker:
                     display_frame = self.draw_overlay(frame, hand_landmarks_draw, 
                                                        letter, confidence)
                     cv2.imshow('Hand Tracker - Lenguaje de Senas', display_frame)
+
+                    # Enviar frame a Unity (si está habilitado)
+                    self._send_video_frame_to_unity(display_frame)
+                else:
+                    # Aún sin ventana, podemos streamear el frame crudo si se desea
+                    self._send_video_frame_to_unity(frame)
                     
                     # Manejar teclas
                     key = cv2.waitKey(1) & 0xFF
@@ -458,6 +514,35 @@ def main():
         help=f'Puerto UDP (default: {UDP_PORT})'
     )
     parser.add_argument(
+        '--video-port',
+        type=int,
+        default=UDP_VIDEO_PORT,
+        help=f'Puerto UDP para video JPEG hacia Unity (default: {UDP_VIDEO_PORT}).'
+    )
+    parser.add_argument(
+        '--no-video',
+        action='store_true',
+        help='Desactivar streaming de video por UDP'
+    )
+    parser.add_argument(
+        '--video-fps',
+        type=float,
+        default=10.0,
+        help='FPS máximo para streaming de video (default: 10)'
+    )
+    parser.add_argument(
+        '--video-width',
+        type=int,
+        default=320,
+        help='Ancho del frame enviado por UDP (se mantiene aspect ratio). 0 desactiva resize (default: 320)'
+    )
+    parser.add_argument(
+        '--video-quality',
+        type=int,
+        default=55,
+        help='Calidad JPEG 10-95 (default: 55)'
+    )
+    parser.add_argument(
         '--ip', '-i', 
         type=str, 
         default=UDP_IP,
@@ -487,6 +572,10 @@ def main():
         model_path=args.model,
         udp_ip=args.ip,
         udp_port=args.port,
+        udp_video_port=None if args.no_video else args.video_port,
+        video_fps=args.video_fps,
+        video_width=args.video_width,
+        video_jpeg_quality=args.video_quality,
         camera_id=args.camera,
         mirror_mode=not args.no_mirror,
         show_window=not args.no_window

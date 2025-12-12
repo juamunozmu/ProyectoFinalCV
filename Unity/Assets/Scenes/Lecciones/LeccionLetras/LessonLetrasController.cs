@@ -3,6 +3,7 @@ using UnityEngine.UIElements;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 public class LessonLetrasController : MonoBehaviour
 {
@@ -21,6 +22,16 @@ public class LessonLetrasController : MonoBehaviour
 
     [Header("Detection Settings")]
     public int historyFrameCount = 30; 
+
+    [Header("OpenCV / UDP Auto Setup")]
+    [Tooltip("Auto-create UDP receiver components in the scene if missing")]
+    public bool autoSetupOpenCV = true;
+
+    [Tooltip("UDP port for hand landmark/prediction JSON")]
+    public int udpJsonPort = 5005;
+
+    [Tooltip("UDP port for JPEG video frames")]
+    public int udpVideoPort = 5006;
     
     // UI Elements
     private VisualElement _sidebar;
@@ -29,8 +40,17 @@ public class LessonLetrasController : MonoBehaviour
     private Button _btnToggle;
     private Label _lblTarget;
     private Label _lblFeedback;
+    private Label _lblDetectedLetter;
     private VisualElement _progressFill;
     private Image _guideImage; // Reference to the 3D View Image
+    private Image _imgOpenCVFeed;
+
+    [Header("OpenCV Feed")]
+    public OpenCVFrameReceiver frameReceiver;
+
+    [Header("Letter Model Settings")]
+    [Range(0f, 1f)]
+    public float correctConfidenceThreshold = 0.80f;
 
     // Internal State
     private bool _isMenuOpen = false;
@@ -47,6 +67,11 @@ public class LessonLetrasController : MonoBehaviour
 
     void OnEnable()
     {
+        if (autoSetupOpenCV)
+        {
+            EnsureOpenCVServices();
+        }
+
         if (uiDocument == null) uiDocument = GetComponent<UIDocument>();
         var root = uiDocument.rootVisualElement;
 
@@ -58,7 +83,13 @@ public class LessonLetrasController : MonoBehaviour
         
         _lblTarget = root.Q<Label>("Lbl_CurrentTarget");
         _lblFeedback = root.Q<Label>("Lbl_Feedback");
+        _lblDetectedLetter = root.Q<Label>("Lbl_DetectedLetter");
         _progressFill = root.Q<VisualElement>("Progress_Fill");
+
+        _imgOpenCVFeed = root.Q<Image>("Img_OpenCVFeed");
+
+        if (frameReceiver == null)
+            frameReceiver = FindObjectOfType<OpenCVFrameReceiver>();
 
         // 2. Bind 3D Guide View & Logic
         _guideImage = root.Q<Image>("Guide_3D_View");
@@ -90,14 +121,145 @@ public class LessonLetrasController : MonoBehaviour
         LoadLessonItems();
     }
 
+    void EnsureOpenCVServices()
+    {
+        // Ensure OpenCVConnector exists (JSON receiver + landmark math)
+        var connector = FindObjectOfType<OpenCVConnector>();
+        if (connector == null)
+        {
+            var go = new GameObject("OpenCVConnector(Auto)");
+            connector = go.AddComponent<OpenCVConnector>();
+            connector.listenAddress = "0.0.0.0";
+            connector.listenPort = udpJsonPort;
+        }
+
+        // Ensure OpenCVFrameReceiver exists (JPEG frames)
+        var receiver = FindObjectOfType<OpenCVFrameReceiver>();
+        if (receiver == null)
+        {
+            var go = new GameObject("OpenCVFrameReceiver(Auto)");
+            receiver = go.AddComponent<OpenCVFrameReceiver>();
+            receiver.listenAddress = "0.0.0.0";
+            receiver.listenPort = udpVideoPort;
+        }
+
+        if (frameReceiver == null)
+            frameReceiver = receiver;
+    }
+
     void Update()
     {
+        UpdateDetectedLetterUI();
+        UpdateOpenCVFeedUI();
+
+        // Always allow model-based correctness if we have a current target object.
+        if (_currentGuideObject != null)
+            ApplyModelCorrectnessOverride();
+
+        // Only run the classic finger-shape + movement lesson logic if SignData exists.
         if (_currentTargetData != null)
         {
             (bool[] fingers, Vector2 handPos) = GetOpenCVData();
             TrackMovement(handPos);
             CompareGesture(fingers);
         }
+    }
+
+    void UpdateDetectedLetterUI()
+    {
+        if (_lblDetectedLetter == null) return;
+
+        if (OpenCVConnector.Instance == null)
+        {
+            _lblDetectedLetter.text = "Detectado: -";
+            return;
+        }
+
+        if (!OpenCVConnector.Instance.handDetected)
+        {
+            _lblDetectedLetter.text = "Detectado: -";
+            return;
+        }
+
+        string letter = OpenCVConnector.Instance.currentLetter;
+        float conf = OpenCVConnector.Instance.currentConfidence;
+
+        if (string.IsNullOrWhiteSpace(letter) || letter == "?")
+        {
+            _lblDetectedLetter.text = "Detectado: ?";
+            return;
+        }
+
+        _lblDetectedLetter.text = $"Detectado: {letter} ({Mathf.RoundToInt(conf * 100f)}%)";
+    }
+
+    void UpdateOpenCVFeedUI()
+    {
+        if (_imgOpenCVFeed == null) return;
+        if (frameReceiver == null) return;
+        if (frameReceiver.currentTexture == null) return;
+
+        _imgOpenCVFeed.image = frameReceiver.currentTexture;
+    }
+
+    void ApplyModelCorrectnessOverride()
+    {
+        if (OpenCVConnector.Instance == null) return;
+        if (!OpenCVConnector.Instance.handDetected) return;
+
+        string predicted = OpenCVConnector.Instance.currentLetter;
+        float conf = OpenCVConnector.Instance.currentConfidence;
+        if (string.IsNullOrWhiteSpace(predicted) || predicted == "?") return;
+        if (conf < correctConfidenceThreshold) return;
+
+        string expected = GetExpectedLetterFromTarget();
+        if (string.IsNullOrWhiteSpace(expected)) return;
+
+        if (string.Equals(predicted.Trim(), expected.Trim(), System.StringComparison.OrdinalIgnoreCase))
+        {
+            UpdateFeedback("Correcta", Color.green, 1f);
+        }
+    }
+
+    string GetExpectedLetterFromTarget()
+    {
+        // Tries to extract a single letter A-Z from current SignData title or prefab name.
+        if (_currentTargetData != null)
+        {
+            string title = _currentTargetData.signTitle;
+            string fromTitle = ExtractSingleLetter(title);
+            if (!string.IsNullOrEmpty(fromTitle)) return fromTitle;
+        }
+
+        if (_currentGuideObject != null)
+        {
+            string fromName = ExtractSingleLetter(_currentGuideObject.name);
+            if (!string.IsNullOrEmpty(fromName)) return fromName;
+        }
+
+        return "";
+    }
+
+    string ExtractSingleLetter(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return "";
+
+        string trimmed = text.Trim();
+        if (trimmed.Length == 1 && char.IsLetter(trimmed[0]))
+            return char.ToUpperInvariant(trimmed[0]).ToString();
+
+        // Prefer explicit single-letter tokens, e.g. "Letra A" -> "A".
+        // We avoid returning the first letter of words like "Letra".
+        char[] separators = new[] { ' ', '\t', '\n', '\r', '-', '_', ':', ';', ',', '.', '/', '\\', '(', ')', '[', ']', '{', '}', '|', '+' };
+        string[] tokens = trimmed.Split(separators, System.StringSplitOptions.RemoveEmptyEntries);
+        for (int i = tokens.Length - 1; i >= 0; i--)
+        {
+            string t = tokens[i].Trim();
+            if (t.Length == 1 && char.IsLetter(t[0]))
+                return char.ToUpperInvariant(t[0]).ToString();
+        }
+
+        return "";
     }
 
     // --- ROTATION LOGIC (New) ---
@@ -174,7 +336,12 @@ public class LessonLetrasController : MonoBehaviour
             return;
         }
 
-        var sorted = prefabs.OrderBy(x => x.name).ToArray();
+        // Prefer letter lessons (e.g. "A", "sign_a") over placeholder shapes (Cube/Cylinder).
+        var sorted = prefabs
+            .OrderByDescending(p => !string.IsNullOrEmpty(GetLetterForAsset(p)))
+            .ThenBy(p => GetLetterForAsset(p))
+            .ThenBy(p => p.name)
+            .ToArray();
 
         _sidebarList.Clear();
 
@@ -185,6 +352,14 @@ public class LessonLetrasController : MonoBehaviour
             string name = p.name;
             var data = p.GetComponent<SignData>();
             if (data != null && !string.IsNullOrEmpty(data.signTitle)) name = data.signTitle;
+
+            // If there is no SignData, but the asset name encodes a letter (e.g. sign_a), show it nicely.
+            if (data == null)
+            {
+                string letter = GetLetterForAsset(p);
+                if (!string.IsNullOrEmpty(letter))
+                    name = $"Letra {letter}";
+            }
 
             btn.text = name;
             btn.AddToClassList("sidebar-item"); 
@@ -206,17 +381,43 @@ public class LessonLetrasController : MonoBehaviour
         {
             foreach (Transform child in guideSpawnPoint) Destroy(child.gameObject);
             _currentGuideObject = Instantiate(prefab, guideSpawnPoint);
+
             _currentTargetData = _currentGuideObject.GetComponent<SignData>();
+            if (_currentTargetData == null)
+            {
+                // Allow using imported models (FBX) as lessons even if the prefab doesn't have SignData yet.
+                _currentTargetData = _currentGuideObject.AddComponent<SignData>();
+                string letter = GetLetterForAsset(prefab);
+                _currentTargetData.signTitle = !string.IsNullOrEmpty(letter) ? letter : prefab.name;
+                _currentTargetData.requiredMovement = GestureMovement.Static;
+                _currentTargetData.minMovementThreshold = 0.15f;
+            }
         }
 
         _positionHistory.Clear();
         _holdTimer = 0;
         UpdateFeedback("Prepara tu mano...", Color.white, 0f);
 
-        if (_currentTargetData != null)
+        if (_lblTarget != null)
         {
-            _lblTarget.text = _currentTargetData.signTitle;
+            string expected = GetExpectedLetterFromTarget();
+            if (!string.IsNullOrEmpty(expected))
+                _lblTarget.text = $"Letra {expected}";
+            else if (_currentTargetData != null && !string.IsNullOrEmpty(_currentTargetData.signTitle))
+                _lblTarget.text = _currentTargetData.signTitle;
         }
+    }
+
+    string GetLetterForAsset(GameObject asset)
+    {
+        if (asset == null) return "";
+        var data = asset.GetComponent<SignData>();
+        if (data != null)
+        {
+            string fromTitle = ExtractSingleLetter(data.signTitle);
+            if (!string.IsNullOrEmpty(fromTitle)) return fromTitle;
+        }
+        return ExtractSingleLetter(asset.name);
     }
 
     // --- GAMEPLAY LOGIC ---

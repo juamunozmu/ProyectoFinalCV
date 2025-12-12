@@ -40,6 +40,12 @@
     justify-content: center;
 }
 
+.webcam-image {
+    width: 100%;
+    height: 100%;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
 /* SECTION 2: 3D GUIDE (Strict 40% of Screen) */
 .guide-section {
     height: 40%;     /* Exact 40% height */
