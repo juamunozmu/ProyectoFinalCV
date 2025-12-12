@@ -1,0 +1,15 @@
+# Requisitos para el Hand Tracker
+# ================================
+# Instalar con: pip install -r requirements.txt
+
+# Procesamiento de video
+opencv-python>=4.8.0
+
+# Detección de manos
+mediapipe>=0.10.0
+
+# Inferencia del modelo
+onnxruntime>=1.16.0
+
+# Utilidades
+numpy>=1.24.0
