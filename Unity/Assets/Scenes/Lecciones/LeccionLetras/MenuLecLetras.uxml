@@ -5,7 +5,7 @@
 
         <ui:VisualElement class="gameplay-stack">
             <ui:VisualElement name="Webcam_Container" class="webcam-section">
-                <ui:Label text="[ CAMERA FEED ]" style="color: grey;"/>
+                <ui:Image name="Img_OpenCVFeed" class="webcam-image" />
             </ui:VisualElement>
 
             <ui:VisualElement class="guide-section">
@@ -15,6 +15,7 @@
             <ui:VisualElement class="info-section">
                 <ui:Label name="Lbl_CurrentTarget" text="Letra A" class="info-title"/>
                 <ui:Label name="Lbl_Feedback" text="Prepara tu mano..." class="info-feedback"/>
+                <ui:Label name="Lbl_DetectedLetter" text="Detectado: -" class="info-title"/>
                 <ui:VisualElement class="progress-bar-bg">
                     <ui:VisualElement name="Progress_Fill" class="progress-fill"/>
                 </ui:VisualElement>
