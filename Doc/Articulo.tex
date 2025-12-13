@@ -1,0 +1,177 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+%Template version as of 6/27/2024
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\begin{document}
+
+\title{Aprendizaje del Alfabeto en Lengua de Señas con un Avatar 3D Interactivo y Retroalimentación de Gestos en Tiempo Real\\
+}
+
+\author{\IEEEauthorblockN{1\textsuperscript{st} Juan Camilo D'Aleman Rodriguez}
+\IEEEauthorblockA{\textit{dept. de sistemas e industrial} \\
+\textit{Universidad Nacional de Colombia }\\
+Bogotá, Colombia \\
+jdalemanr@unal.edu.co}
+\and
+\IEEEauthorblockN{2\textsuperscript{nd} Juan Esteban Medina Cardenas}
+\IEEEauthorblockA{\textit{dept. de sistemas e industrial } \\
+\textit{Universidad Nacional de Colombia}\\
+Bogotá, Colombia \\
+jumedinaca@unal.edu.co}
+\and
+\IEEEauthorblockN{3\textsuperscript{rd} Juan Esteban Muñoz Muñoz}
+\IEEEauthorblockA{\textit{dept. de sistemas e industrial} \\
+\textit{Universidad Nacional de Colombia}\\
+Bogotá, Colombia \\
+juamunozmu@unal.edu.co}
+\and
+\IEEEauthorblockN{4\textsuperscript{th} Manuel Felipe Espinosa Español}
+\IEEEauthorblockA{\textit{dept. de sistemas e industrial} \\
+\textit{Universidad Nacional de Colombia}\\
+Bogotá, Colombia \\
+mespinosae@unal.edu.co}
+
+}
+
+\maketitle
+
+\begin{abstract}
+Este artículo presenta el diseño e implementación de una aplicación educativa MVP que enseña el alfabeto en lengua de señas utilizando un avatar 3D y evaluación de gestos en tiempo real. El sistema combina Unity para contenido interactivo, Blender para modelado y animación de avatares, y MediaPipe Hands para el seguimiento de manos basado en puntos de referencia. Un modelo de coincidencia ligero evalúa los gestos del usuario y proporciona retroalimentación inmediata (Correcto, Casi, Incorrecto). El MVP se centra en las vocales (A, E, I, O, U) y consonantes, admite la persistencia local del progreso del usuario y funciona sin conexión para preservar la privacidad. Los resultados preliminares indican una interacción receptiva (objetivo de retroalimentación menor a 150 ms) y un rendimiento adecuado en PC, con una hoja de ruta para la implementación en Android y futuros módulos.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Lengua de señas, visión por computadora, MediaPipe, Unity, Blender, interacción humano-computadora, accesibilidad, tecnología educativa.
+\end{IEEEkeywords}
+
+\section{Introducción}
+El proyecto tiene como objetivo reducir las barreras para el aprendizaje de la lengua de señas proporcionando una herramienta accesible, atractiva y moderna que beneficie tanto a los usuarios oyentes que comienzan su viaje como a los usuarios sordos en contextos de alfabetización. El aprendizaje tradicional sufre de materiales interactivos limitados y escasas oportunidades de retroalimentación inmediata. Nuestro enfoque aprovecha las animaciones 3D interactivas y la visión por computadora en tiempo real para apoyar la práctica y la retención.
+
+Esta primera versión (MVP) se dirige al alfabeto, comenzando con las vocales para el control del alcance y la viabilidad. Los usuarios ven a un avatar realizar la seña, la imitan frente a la cámara y reciben retroalimentación instantánea. El sistema almacena el progreso local y está diseñado para escalar hacia consonantes y saludos básicos.
+
+\section{Trabajo Relacionado y Contexto}
+Las herramientas educativas anteriores a menudo dependen de videos pregrabados o ilustraciones estáticas, lo que limita la interactividad y la personalización. La estimación de la pose de la mano ha madurado con soluciones como MediaPipe Hands, que permite una extracción robusta de puntos de referencia en tiempo real (21 puntos clave por mano). Los clasificadores de ML se entrenaron para el reconocimiento completo de gestos.
+
+\section{Descripción General del Sistema}
+
+\subsection{Objetivos}
+\begin{itemize}
+\item Entregar un MVP funcional para el aprendizaje del alfabeto en lengua de señas (vocales).
+\item Combinar la instrucción de avatar 3D con detección de gestos en tiempo real y evaluación.
+\item Proporcionar retroalimentación inmediata y rastrear el progreso del usuario localmente.
+\item Operar sin conexión para respetar la privacidad.
+\end{itemize}
+
+\subsection{Alcance}
+Incluye un inicio de sesión/registro básico, un módulo completo de vocales, interfaz de usuario principal (Menú, Práctica, Lecciones, Hoja de ruta) y persistencia local. Excluye backends en la nube, gamificación avanzada y soporte multilingüe en el MVP.
+
+\subsection{Arquitectura}
+\begin{itemize}
+\item Presentación: Escenas de Unity para Menú, Hoja de ruta, Práctica, Lecciones.
+\item Dominio/Lógica: Controladores de letras, máquina de estados de evaluación de gestos.
+\item Infraestructura: Persistencia basada en JSON (UserData, ProgressData, umbrales).
+\item Integración de CV: Envoltorio de MediaPipe Hands para transmitir puntos de referencia.
+\item Animación: Animaciones FBX creadas en Blender importadas a Unity, controladas a través de Animator.
+\end{itemize}
+
+\section{Métodos}
+
+\subsection{Modelado y Animación de Avatares}
+Se importó un avatar humano riggeado de Mixamo a Blender. Las poses de las manos para las vocales se crearon como animaciones de fotogramas clave (por ejemplo, Sign\_A, Sign\_E). Las animaciones se exportaron como FBX con la configuración adecuada de la armadura (sin huesos de hoja, animación horneada). En Unity, los clips se configuraron bajo un rig humanoide, gestionado a través de Animator Controller, lo que permite la reproducción, el control de bucle y la retención de pose.
+
+\subsection{Pipeline de Visión por Computadora}
+Se integró MediaPipe Hands para capturar puntos de referencia de la mano en tiempo real. Los puntos de referencia se normalizaron en relación con la orientación y escala de la muñeca para proporcionar comparaciones estables independientes de la posición de la cámara. El sistema no almacena imágenes/video, solo vectores numéricos normalizados, preservando la privacidad.
+
+\subsection{Evaluación}
+El MVP utiliza un modelo entrenado para comparar y decidir si el gesto es correcto o incorrecto.
+
+\subsection{Retroalimentación y UX}
+La aplicación proporciona indicadores visuales directos. Las lecciones utilizan la parte superior del cuerpo completa del avatar; la práctica utiliza visuales de manos enfocados. La interfaz de usuario busca un alto contraste, visualización de cámara reflejada para una interacción intuitiva y tiempos claros (marcos de estabilidad $\sim$5).
+
+\section{Detalles de Implementación}
+
+\subsection{Pila Tecnológica}
+\begin{itemize}
+\item Motor: Unity (se recomienda 2022 LTS), C\#.
+\item CV: MediaPipe Hands a través de la integración de Unity.
+\item 3D: Blender (rigging, animación), exportación FBX a Unity.
+\item UI: Unity UI (Canvas) y TextMeshPro.
+\item Datos: JSON para persistencia.
+\end{itemize}
+
+\subsection{Organización del Proyecto}
+Assets/
+\begin{itemize}
+\item Scenes
+\item Scripts
+\item Animations
+\item Models
+\item UI
+\item Config
+\end{itemize}
+
+\subsection{Prácticas de Exportación e Importación}
+Exportación FBX desde Blender con Objetos Seleccionados (Malla + Armadura), Aplicar Escalas: FBX Todo, Adelante -Z, Arriba Y, Agregar Huesos de Hoja deshabilitado, Hornear Animación habilitado. En Unity, establecer Rig en Humanoide, extraer materiales/texturas, configurar opciones de clip de animación (Bucle desactivado para poses fijas).
+
+\section{Resultados}
+
+\subsection{Resultados Funcionales}
+\begin{itemize}
+\item Lecciones de vocales implementadas con animaciones de avatar.
+\item Seguimiento de manos en tiempo real y evaluación operativa en PC.
+\item Retroalimentación inmediata con pistas básicas.
+\item Persistencia local de finalización por letra.
+\item Navegación de interfaz de usuario a través de Menú, Lecciones, Práctica.
+\end{itemize}
+
+\subsection{Indicadores de Rendimiento}
+\begin{itemize}
+\item Latencia objetivo para retroalimentación: $<150$ ms (dependiendo del hardware).
+\item Velocidad de fotogramas objetivo: $\ge 30$ FPS en Android de gama media; verificado estable en PC.
+\end{itemize}
+
+\subsection{Observaciones de Usabilidad}
+Los usuarios se benefician de la vista de cámara reflejada y la comparación clara lado a lado del avatar frente a la mano del usuario.
+
+\section{Discusión}
+
+\subsection{Riesgos y Mitigaciones}
+\begin{itemize}
+\item Riesgo de integración de MediaPipe Android: prototipar temprano, recurrir al modo de demostración de PC si es necesario.
+\item Riesgo de cobertura de animación: priorizar la fidelidad de la mano, estandarizar nombres, permitir marcadores de posición.
+\item Riesgo de rendimiento: perfilar y optimizar la resolución de la cámara, reducir las asignaciones por fotograma.
+\end{itemize}
+
+\subsection{Privacidad}
+No se persisten imágenes ni videos. Solo se almacenan características numéricas normalizadas para el progreso y la evaluación, manteniendo los datos del usuario locales y mínimos.
+
+\section{Conclusión y Trabajo Futuro}
+Entregamos una arquitectura e implementación MVP para el aprendizaje del alfabeto en lengua de señas, combinando un avatar 3D en Unity, animaciones de Blender y seguimiento de manos basado en MediaPipe. El sistema proporciona retroalimentación inmediata y seguimiento del progreso local, operando sin conexión para apoyar la accesibilidad.
+
+El trabajo futuro incluye expandir el contenido a saludos básicos, mejorar las pistas con retroalimentación adaptativa, agregar clasificación ML opcional para gestos ambiguos, mejorar las características de accesibilidad y completar la optimización y empaquetado de Android.
+
+\section*{Agradecimientos}
+Agradecemos a los colaboradores del proyecto en todos los roles, así mismo a la profesora Aura Maria Forero Pachon y el Ing Arbey Aragon Bohorquez por brindarnos el conocimiento necesario en los contenidos de las clases. También reconocemos los recursos de la comunidad (Mixamo, MediaPipe) que permitieron la creación rápida de prototipos.
+
+\section*{}
+
+\begin{thebibliography}{00}
+\bibitem{b1} MediaPipe Hands, Google Research.
+\bibitem{b2} Unity Technologies, Unity Engine Documentation.
+\bibitem{b3} Blender Foundation, Blender Manual.
+\bibitem{b4} Adobe Mixamo, Rigged Character Library.
+\bibitem{b5} TextMeshPro, Unity Asset integration.
+\bibitem{b6} Unity Test Framework Documentation.
+\end{thebibliography}
+
+
+
+\end{document}
