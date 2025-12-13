@@ -256,12 +256,14 @@ public class CustomMenuController : MonoBehaviour
             {
                 _buttons[i].AddToClassList("active");
                 _views[i].AddToClassList("view-active");
+                _views[i].style.display = DisplayStyle.Flex;
                 _views[i].BringToFront(); 
             }
             else
             {
                 _buttons[i].RemoveFromClassList("active");
                 _views[i].RemoveFromClassList("view-active");
+                _views[i].style.display = DisplayStyle.None;
             }
         }
     }
