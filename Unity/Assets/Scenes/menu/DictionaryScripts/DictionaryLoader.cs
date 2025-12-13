@@ -183,7 +183,7 @@ public class DictionaryLoader : MonoBehaviour
 
                 var sortedPrefabs = loadedPrefabs.OrderBy(p => p.name).ToArray();
                 foreach (GameObject prefab in sortedPrefabs)
-                    CreateButtonForPrefab(prefab, groupCard);
+                    CreateButtonForPrefab(prefab, $"{loadPath}/{prefab.name}", groupCard);
             }
             else
             {

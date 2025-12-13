@@ -38,7 +38,7 @@ public class DictionaryDetailController : MonoBehaviour
 
     void LoadData()
     {
-        // Get the prefab from the static bridge. If it was lost (domain reload) recover via Resources path.
+        // Get the prefab from the static bridge.
         GameObject prefab = DictionaryBridge.selectedPrefab;
         if (prefab == null && !string.IsNullOrWhiteSpace(DictionaryBridge.selectedPrefabResourcesPath))
         {
@@ -46,7 +46,7 @@ public class DictionaryDetailController : MonoBehaviour
             DictionaryBridge.selectedPrefab = prefab;
         }
 
-        // If still null (e.g. user opened this scene directly), fallback to first lesson letter.
+        // Fallback Logic
         if (prefab == null)
         {
             GameObject[] vowels = Resources.LoadAll<GameObject>("Gestures/Letras/vowels");
@@ -63,7 +63,7 @@ public class DictionaryDetailController : MonoBehaviour
 
         if (prefab == null)
         {
-            Debug.LogError("No prefab selected and no lesson letter assets found in Resources/Gestures/Letras/(vowels|consonants).");
+            Debug.LogError("No prefab selected and no lesson letter assets found.");
             return;
         }
 
@@ -120,12 +120,19 @@ public class DictionaryDetailController : MonoBehaviour
             
             // Spawn new model
             GameObject instance = Instantiate(prefab, modelSpawnPoint);
+            
             if (instance != null)
             {
                 instance.name = prefab.name;
+
+                // --- KEY FIX START ---
+                // Reset Position, Rotation, and Scale to strict defaults
                 instance.transform.localPosition = Vector3.zero;
                 instance.transform.localRotation = Quaternion.identity;
+                instance.transform.localScale = Vector3.one; 
+                // --- KEY FIX END ---
 
+                // Setup Animation
                 var animator = instance.GetComponentInChildren<Animator>(true);
                 if (animator != null)
                 {
@@ -136,32 +143,21 @@ public class DictionaryDetailController : MonoBehaviour
 
                 EnsureAnimationPlays(instance, DictionaryBridge.selectedPrefabResourcesPath);
 
-                var renderers = instance.GetComponentsInChildren<Renderer>(true);
-                if (renderers != null && renderers.Length > 0)
-                {
-                    Bounds b = renderers[0].bounds;
-                    for (int i = 1; i < renderers.Length; i++)
-                        b.Encapsulate(renderers[i].bounds);
-
-                    Vector3 desiredCenter = modelSpawnPoint.position;
-                    Vector3 delta = desiredCenter - b.center;
-                    instance.transform.position += delta;
-                }
+                // NOTE: I removed the Bounds/Renderer calculation block here.
+                // That block was calculating the center of the mesh and moving the object
+                // to compensate, which is why your position wasn't 0,0,0 before.
             }
             
             // B. GET DATA
-            // Look for the SignData script on the object we just spawned
             SignData data = instance.GetComponent<SignData>();
 
             if (data != null)
             {
-                // Update UI Labels
                 if (_lblTitle != null) _lblTitle.text = data.signTitle;
                 if (_lblDescription != null) _lblDescription.text = data.signDescription;
             }
             else
             {
-                // Fallback if you forgot to add the script to the prefab
                 if (_lblTitle != null) _lblTitle.text = prefab.name;
                 if (_lblDescription != null) _lblDescription.text = "No description available.";
             }

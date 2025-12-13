@@ -1,0 +1,36 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Unity", "Unity", "{F2F4A18A-13DA-A99B-7F1B-2CF93E0D20FA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp-Editor", "Unity\Assembly-CSharp-Editor.csproj", "{75603614-796E-AEA5-6966-14FB684BAABE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp", "Unity\Assembly-CSharp.csproj", "{9687DAA0-D59F-5570-398F-79231A3B7A0E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{75603614-796E-AEA5-6966-14FB684BAABE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75603614-796E-AEA5-6966-14FB684BAABE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75603614-796E-AEA5-6966-14FB684BAABE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75603614-796E-AEA5-6966-14FB684BAABE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9687DAA0-D59F-5570-398F-79231A3B7A0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9687DAA0-D59F-5570-398F-79231A3B7A0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9687DAA0-D59F-5570-398F-79231A3B7A0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9687DAA0-D59F-5570-398F-79231A3B7A0E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{75603614-796E-AEA5-6966-14FB684BAABE} = {F2F4A18A-13DA-A99B-7F1B-2CF93E0D20FA}
+		{9687DAA0-D59F-5570-398F-79231A3B7A0E} = {F2F4A18A-13DA-A99B-7F1B-2CF93E0D20FA}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {20F95362-6BEF-4873-8EE6-5E5121F8BB8F}
+	EndGlobalSection
+EndGlobal

@@ -6,11 +6,12 @@
                 <ui:VisualElement class="padding-container">
                     <ui:Label text="Hola, que deseas aprender hoy?" class="header-title"/>
                     <ui:VisualElement class="card">
-                        <ui:Label text="SE&#209;A DEL D&#205;A" class="card-title"/>
+                        <ui:Label text="SE&#209;A DEL D&#205;A" class="card-title" name="Lbl_SignName"/>
                         <ui:VisualElement class="media-placeholder">
                             <ui:Image name="Model3D_View" class="model-preview-image" picking-mode="Position" />
                         </ui:VisualElement>
                         <ui:VisualElement style="flex-direction: row; justify-content: flex-end; margin-top: 10px;">
+                        <ui:Label name="Lbl_SignName" text="..." style="font-size: 18px; -unity-font-style: bold; color: white;" />
                             <ui:Label name="Lbl_Date" text="Today" class="tag-accent"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
