@@ -199,6 +199,10 @@ cython_debug/
 #  exclude from AI features like autocomplete and code analysis. Recommended for sensitive data
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
+
+# Unity (local editor settings)
+# These files are machine/user-specific and should not be versioned.
+Unity/UserSettings/
 .cursorindexingignore
 
 # Marimo
