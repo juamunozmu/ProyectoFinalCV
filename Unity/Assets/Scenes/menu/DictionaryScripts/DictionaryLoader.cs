@@ -14,10 +14,26 @@ public class DictionaryLoader : MonoBehaviour
     [Tooltip("Folder names inside 'Assets/Resources/Gestures/'. Example: 'Letras', 'Saludos'")]
     public List<string> categoryFolders; 
 
+    [Header("Filtering")]
+    [Tooltip("If true, the dictionary shows only the lesson letters (vowels + consonants).")]
+    public bool onlyLessonVowels = true;
+
+    [Tooltip("Legacy folder setting (kept for backwards compatibility).")]
+    public string lessonVowelsFolder = "Letras/vowels";
+
+    [Tooltip("Header title displayed for the restricted list.")]
+    public string lessonVowelsHeaderTitle = "Letras";
+
     // Internal State
     private VisualElement _listContainer;
     private TextField _searchInput;
     private List<Button> _allGeneratedButtons = new List<Button>();
+
+    private static readonly HashSet<string> _letters = new HashSet<string>(
+        Enumerable.Range('A', 26).Select(i => ((char)i).ToString()),
+        System.StringComparer.OrdinalIgnoreCase);
+
+    private static readonly string[] _lessonLetterFolders = new[] { "Gestures/Letras/vowels", "Gestures/Letras/consonants" };
 
     void OnEnable()
     {
@@ -32,7 +48,51 @@ public class DictionaryLoader : MonoBehaviour
         if (_searchInput != null)
             _searchInput.RegisterValueChangedCallback(evt => FilterList(evt.newValue));
 
+        // Show only lesson letters (vowels + consonants) to avoid Cube/Cylinder/etc.
+        onlyLessonVowels = true;
+        lessonVowelsHeaderTitle = "Letras";
+
         GenerateDictionary();
+    }
+
+    static bool TryExtractSingleLetter(string text, out string letter)
+    {
+        letter = "";
+        if (string.IsNullOrWhiteSpace(text)) return false;
+
+        string trimmed = text.Trim();
+        if (trimmed.Length == 1 && char.IsLetter(trimmed[0]))
+        {
+            letter = char.ToUpperInvariant(trimmed[0]).ToString();
+            return true;
+        }
+
+        char[] separators = new[] { ' ', '\t', '\n', '\r', '-', '_', ':', ';', ',', '.', '/', '\\', '(', ')', '[', ']', '{', '}', '|', '+' };
+        string[] tokens = trimmed.Split(separators, System.StringSplitOptions.RemoveEmptyEntries);
+        for (int i = tokens.Length - 1; i >= 0; i--)
+        {
+            string t = tokens[i].Trim();
+            if (t.Length == 1 && char.IsLetter(t[0]))
+            {
+                letter = char.ToUpperInvariant(t[0]).ToString();
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    bool TryGetLessonLetter(GameObject prefab, out string letter)
+    {
+        letter = "";
+        if (prefab == null) return false;
+
+        // Prefer SignData title if present.
+        var data = prefab.GetComponent<SignData>();
+        if (data != null && TryExtractSingleLetter(data.signTitle, out letter))
+            return true;
+
+        return TryExtractSingleLetter(prefab.name, out letter);
     }
 
     void GenerateDictionary()
@@ -46,36 +106,84 @@ public class DictionaryLoader : MonoBehaviour
         _listContainer.Clear();
         _allGeneratedButtons.Clear();
 
-        // 2. Loop through categories
+        // 2. Loop through categories (or restrict to vowel lessons)
+        if (onlyLessonVowels)
+        {
+            var entries = new List<(GameObject Prefab, string Path)>();
+            foreach (string folder in _lessonLetterFolders)
+            {
+                GameObject[] loaded = Resources.LoadAll<GameObject>(folder);
+                if (loaded == null) continue;
+                for (int i = 0; i < loaded.Length; i++)
+                {
+                    var p = loaded[i];
+                    if (p == null) continue;
+                    entries.Add((p, $"{folder}/{p.name}"));
+                }
+            }
+
+            if (entries.Count == 0)
+            {
+                Debug.LogWarning("No lesson letter assets found at Resources/Gestures/Letras/(vowels|consonants). ");
+                return;
+            }
+
+            Label header = new Label(string.IsNullOrEmpty(lessonVowelsHeaderTitle) ? "Letras" : lessonVowelsHeaderTitle);
+            header.AddToClassList("card-title");
+            header.style.marginTop = 20;
+            _listContainer.Add(header);
+
+            VisualElement groupCard = new VisualElement();
+            groupCard.AddToClassList("card");
+            _listContainer.Add(groupCard);
+
+            // Keep only A-Z letters and dedupe by letter.
+            // Prefer entries with SignData and/or an AnimatorController.
+            var bestByLetter = entries
+                .Select(x => new
+                {
+                    x.Prefab,
+                    x.Path,
+                    HasLetter = TryGetLessonLetter(x.Prefab, out var l),
+                    Letter = l,
+                    HasSignData = x.Prefab != null && x.Prefab.GetComponent<SignData>() != null,
+                    HasAnimatorController = x.Prefab != null && x.Prefab.GetComponentInChildren<Animator>(true) != null && x.Prefab.GetComponentInChildren<Animator>(true).runtimeAnimatorController != null
+                })
+                .Where(x => x.HasLetter && _letters.Contains(x.Letter))
+                .GroupBy(x => x.Letter, System.StringComparer.OrdinalIgnoreCase)
+                .Select(g => g
+                    .OrderByDescending(x => (x.HasSignData ? 2 : 0) + (x.HasAnimatorController ? 1 : 0))
+                    .ThenBy(x => x.Prefab.name)
+                    .First())
+                .OrderBy(x => x.Letter)
+                .ThenBy(x => x.Prefab.name)
+                .ToArray();
+
+            foreach (var entry in bestByLetter)
+                CreateButtonForPrefab(entry.Prefab, entry.Path, groupCard);
+
+            return;
+        }
+
         foreach (string category in categoryFolders)
         {
-            // PATH FIX: Resources.Load uses path relative to Resources folder.
-            // If actual folder is "Assets/Resources/Gestures/Letras", load path is "Gestures/Letras"
             string loadPath = $"Gestures/{category}";
-
             GameObject[] loadedPrefabs = Resources.LoadAll<GameObject>(loadPath);
 
             if (loadedPrefabs.Length > 0)
             {
-                // A. Create Header (e.g. "Letras")
                 Label header = new Label(category);
-                header.AddToClassList("card-title"); 
-                header.style.marginTop = 20; 
+                header.AddToClassList("card-title");
+                header.style.marginTop = 20;
                 _listContainer.Add(header);
 
-                // B. Create Card Container
                 VisualElement groupCard = new VisualElement();
                 groupCard.AddToClassList("card");
                 _listContainer.Add(groupCard);
 
-                // C. Sort A-Z
                 var sortedPrefabs = loadedPrefabs.OrderBy(p => p.name).ToArray();
-
-                // D. Create Buttons
                 foreach (GameObject prefab in sortedPrefabs)
-                {
                     CreateButtonForPrefab(prefab, groupCard);
-                }
             }
             else
             {
@@ -84,7 +192,7 @@ public class DictionaryLoader : MonoBehaviour
         }
     }
 
-    void CreateButtonForPrefab(GameObject prefab, VisualElement parent)
+    void CreateButtonForPrefab(GameObject prefab, string resourcesPath, VisualElement parent)
     {
         // 1. Get Title
         string buttonText = prefab.name; 
@@ -101,17 +209,24 @@ public class DictionaryLoader : MonoBehaviour
         btn.AddToClassList("list-item"); // Apply USS style
         
         // 3. Logic: Click -> Bridge Data -> Change Scene
-        btn.clicked += () => OpenDetailScene(prefab);
+        btn.clicked += () => OpenDetailScene(prefab, resourcesPath);
 
         // 4. Add to UI
         parent.Add(btn);
         _allGeneratedButtons.Add(btn);
     }
 
-    void OpenDetailScene(GameObject prefabToLoad)
+    void OpenDetailScene(GameObject prefabToLoad, string resourcesPath)
     {
         // Pass the prefab to the static bridge so the next scene can read it
         DictionaryBridge.selectedPrefab = prefabToLoad;
+
+        // Store a Resources path fallback for robustness (also used to load animation clips from FBX subassets).
+        if (prefabToLoad != null)
+            DictionaryBridge.selectedPrefabResourcesPath = string.IsNullOrWhiteSpace(resourcesPath)
+                ? $"Gestures/Letras/vowels/{prefabToLoad.name}"
+                : resourcesPath;
+
         SceneManager.LoadScene(detailSceneName);
     }
 

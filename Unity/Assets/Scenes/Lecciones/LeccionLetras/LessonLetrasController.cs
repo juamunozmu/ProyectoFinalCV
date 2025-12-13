@@ -384,27 +384,32 @@ public class LessonLetrasController : MonoBehaviour
             return;
         }
 
-        // Prefer letter lessons (e.g. "A", "sign_a") over placeholder shapes (Cube/Cylinder).
-        // Also dedupe letters: if multiple prefabs map to the same single-letter key, keep the first.
-        var sorted = prefabs
-            .OrderByDescending(p => !string.IsNullOrEmpty(GetLetterForAsset(p)))
-            .ThenBy(p => GetLetterForAsset(p))
-            .ThenBy(p => p.name)
-            .ToArray();
-
-        var unique = new List<GameObject>(sorted.Length);
-        var seenLetters = new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
-        foreach (var p in sorted)
+        int ScoreLessonAsset(GameObject asset)
         {
-            string letterKey = GetLetterForAsset(p);
-            if (!string.IsNullOrEmpty(letterKey))
-            {
-                if (seenLetters.Contains(letterKey))
-                    continue;
-                seenLetters.Add(letterKey);
-            }
-            unique.Add(p);
+            if (asset == null) return 0;
+            int score = 0;
+            if (asset.GetComponent<SignData>() != null) score += 10;
+
+            var animator = asset.GetComponent<Animator>();
+            if (animator != null && animator.runtimeAnimatorController != null) score += 5;
+            return score;
         }
+
+        // Prefer letter lessons (e.g. "A", "sign_a") over placeholder shapes (Cube/Cylinder).
+        // Also dedupe letters: if multiple assets map to the same single-letter key, prefer the one
+        // that looks like a real lesson prefab (has SignData and/or an AnimatorController).
+        var unique = prefabs
+            .Select(p => new { Asset = p, Letter = GetLetterForAsset(p) })
+            .Where(x => !string.IsNullOrEmpty(x.Letter))
+            .GroupBy(x => x.Letter, System.StringComparer.OrdinalIgnoreCase)
+            .Select(g => g
+                .OrderByDescending(x => ScoreLessonAsset(x.Asset))
+                .ThenBy(x => x.Asset.name)
+                .First()
+                .Asset)
+            .OrderBy(p => GetLetterForAsset(p))
+            .ThenBy(p => p.name)
+            .ToList();
 
         _sidebarList.Clear();
 
@@ -444,6 +449,7 @@ public class LessonLetrasController : MonoBehaviour
         {
             foreach (Transform child in guideSpawnPoint) Destroy(child.gameObject);
             _currentGuideObject = Instantiate(prefab, guideSpawnPoint);
+            if (_currentGuideObject != null) _currentGuideObject.name = prefab.name;
 
             _currentTargetData = _currentGuideObject.GetComponent<SignData>();
             if (_currentTargetData == null)

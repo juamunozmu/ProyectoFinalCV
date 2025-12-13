@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEngine.SceneManagement;
+using System.Collections.Generic;
 
 public class DictionaryDetailController : MonoBehaviour
 {
@@ -37,13 +38,78 @@ public class DictionaryDetailController : MonoBehaviour
 
     void LoadData()
     {
-        // Get the prefab from the static bridge
+        // Get the prefab from the static bridge. If it was lost (domain reload) recover via Resources path.
         GameObject prefab = DictionaryBridge.selectedPrefab;
+        if (prefab == null && !string.IsNullOrWhiteSpace(DictionaryBridge.selectedPrefabResourcesPath))
+        {
+            prefab = Resources.Load<GameObject>(DictionaryBridge.selectedPrefabResourcesPath);
+            DictionaryBridge.selectedPrefab = prefab;
+        }
+
+        // If still null (e.g. user opened this scene directly), fallback to first lesson letter.
+        if (prefab == null)
+        {
+            GameObject[] vowels = Resources.LoadAll<GameObject>("Gestures/Letras/vowels");
+            if (vowels != null && vowels.Length > 0)
+                prefab = vowels[0];
+            else
+            {
+                GameObject[] consonants = Resources.LoadAll<GameObject>("Gestures/Letras/consonants");
+                prefab = consonants != null && consonants.Length > 0 ? consonants[0] : null;
+            }
+            DictionaryBridge.selectedPrefab = prefab;
+            DictionaryBridge.selectedPrefabResourcesPath = prefab != null ? $"Gestures/Letras/vowels/{prefab.name}" : null;
+        }
 
         if (prefab == null)
         {
-            Debug.LogError("No prefab selected! Did you start from the Main Menu?");
+            Debug.LogError("No prefab selected and no lesson letter assets found in Resources/Gestures/Letras/(vowels|consonants).");
             return;
+        }
+
+        void EnsureAnimationPlays(GameObject instance, string resourcesPath)
+        {
+            if (instance == null) return;
+
+            var animator = instance.GetComponentInChildren<Animator>(true);
+            if (animator == null)
+                animator = instance.AddComponent<Animator>();
+
+            if (animator.runtimeAnimatorController == null && !string.IsNullOrWhiteSpace(resourcesPath))
+            {
+                var baseController = Resources.Load<RuntimeAnimatorController>("Gestures/Letras/vowels/sing_a");
+                if (baseController != null)
+                {
+                    AnimationClip selectedClip = null;
+                    var clips = Resources.LoadAll<AnimationClip>(resourcesPath);
+                    if (clips != null)
+                    {
+                        for (int i = 0; i < clips.Length; i++)
+                        {
+                            var c = clips[i];
+                            if (c == null) continue;
+                            if (c.name != null && c.name.Contains("__preview__")) continue;
+                            selectedClip = c;
+                            break;
+                        }
+                    }
+
+                    if (selectedClip != null)
+                    {
+                        var overrideController = new AnimatorOverrideController(baseController);
+                        var overrides = new List<KeyValuePair<AnimationClip, AnimationClip>>();
+                        overrideController.GetOverrides(overrides);
+                        for (int i = 0; i < overrides.Count; i++)
+                            overrides[i] = new KeyValuePair<AnimationClip, AnimationClip>(overrides[i].Key, selectedClip);
+                        overrideController.ApplyOverrides(overrides);
+                        animator.runtimeAnimatorController = overrideController;
+                    }
+                }
+            }
+
+            animator.Rebind();
+            animator.Update(0f);
+            animator.Play(0, 0, 0f);
         }
 
         // A. SPAWN MODEL
@@ -54,6 +120,34 @@ public class DictionaryDetailController : MonoBehaviour
             
             // Spawn new model
             GameObject instance = Instantiate(prefab, modelSpawnPoint);
+            if (instance != null)
+            {
+                instance.name = prefab.name;
+                instance.transform.localPosition = Vector3.zero;
+                instance.transform.localRotation = Quaternion.identity;
+
+                var animator = instance.GetComponentInChildren<Animator>(true);
+                if (animator != null)
+                {
+                    animator.Rebind();
+                    animator.Update(0f);
+                    animator.Play(0, 0, 0f);
+                }
+
+                EnsureAnimationPlays(instance, DictionaryBridge.selectedPrefabResourcesPath);
+
+                var renderers = instance.GetComponentsInChildren<Renderer>(true);
+                if (renderers != null && renderers.Length > 0)
+                {
+                    Bounds b = renderers[0].bounds;
+                    for (int i = 1; i < renderers.Length; i++)
+                        b.Encapsulate(renderers[i].bounds);
+
+                    Vector3 desiredCenter = modelSpawnPoint.position;
+                    Vector3 delta = desiredCenter - b.center;
+                    instance.transform.position += delta;
+                }
+            }
             
             // B. GET DATA
             // Look for the SignData script on the object we just spawned
