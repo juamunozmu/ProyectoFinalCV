@@ -90,6 +90,15 @@ Se importó un avatar humano riggeado de Mixamo a Blender. Las poses de las mano
 \subsection{Pipeline de Visión por Computadora}
 Se integró MediaPipe Hands para capturar puntos de referencia de la mano en tiempo real. Los puntos de referencia se normalizaron en relación con la orientación y escala de la muñeca para proporcionar comparaciones estables independientes de la posición de la cámara. El sistema no almacena imágenes/video, solo vectores numéricos normalizados, preservando la privacidad.
 
+\subsection{Clasificación mediante Support Vector Machines (SVM)}
+A partir de los puntos de referencia normalizados de la mano, cada seña se representó como un vector de características de 63 dimensiones, correspondiente a las coordenadas tridimensionales de los 21 landmarks detectados. Estos vectores describen la geometría relativa de la mano y constituyen la entrada del modelo de clasificación.
+
+Para el reconocimiento de las señas estáticas se empleó un clasificador Support Vector Machine (SVM) con kernel de función de base radial (RBF). Este modelo es adecuado para datos continuos y de baja dimensionalidad, y permite aprender fronteras de decisión no lineales que separan eficazmente las distintas configuraciones geométricas de la mano.
+
+Dado que el problema es multiclase, el SVM se extendió mediante una estrategia one-vs-one, en la cual se entrenan clasificadores binarios para cada par de clases. La decisión final se obtiene a partir de un esquema de votación entre dichos clasificadores. Cada clasificador aprende un hiperplano en el espacio de características, permitiendo una discriminación robusta entre señas con variaciones naturales en la postura de la mano.
+
+El uso de SVM proporciona una solución computacionalmente eficiente y con buena capacidad de generalización, adecuada para la inferencia en tiempo real dentro de la aplicación desarrollada en Unity.
+
 \subsection{Evaluación}
 El MVP utiliza un modelo entrenado para comparar y decidir si el gesto es correcto o incorrecto.
 
