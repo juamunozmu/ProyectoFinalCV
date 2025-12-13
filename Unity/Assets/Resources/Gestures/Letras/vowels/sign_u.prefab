@@ -110,7 +110,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SignData
   signTitle: "Se\xF1a U"
-  signDescription: para hacer....
+  signDescription: "Con la palma apuntando al receptor, se doblan los dedos pulgar,
+    anular y coraz\xF3n, los dedos me\xF1ique e \xEDndice se mantienen levantados"
   isThumbOpen: 0
   isIndexOpen: 0
   isMiddleOpen: 0

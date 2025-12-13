@@ -110,7 +110,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SignData
   signTitle: "Se\xF1a E"
-  signDescription: Se debe hacer
+  signDescription: Con la palma mirando al receptor, se doblan todos los dedos, con
+    el pulgar ligeramente levantado
   isThumbOpen: 0
   isIndexOpen: 0
   isMiddleOpen: 0

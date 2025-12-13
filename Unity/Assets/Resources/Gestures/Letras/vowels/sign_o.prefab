@@ -2055,7 +2055,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SignData
   signTitle: "Se\xF1a O "
-  signDescription: 'Se debe hacer... '
+  signDescription: Con la palma apuntando a la persona, se doblan todos los dedos
   isThumbOpen: 0
   isIndexOpen: 0
   isMiddleOpen: 0

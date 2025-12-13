@@ -109,7 +109,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SignData
   signTitle: "Se\xF1a I"
-  signDescription: 'se debe hacer '
+  signDescription: "con la palma apuntndo al receptor se deben doblar todos los dedos
+    menos el me\xF1ique que se mantiene levantado"
   isThumbOpen: 0
   isIndexOpen: 0
   isMiddleOpen: 0
