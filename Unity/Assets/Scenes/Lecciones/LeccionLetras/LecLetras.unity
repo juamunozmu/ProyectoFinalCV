@@ -279,11 +279,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LessonGameController
   uiDocument: {fileID: 412892059}
   mainMenuScene: MenuScene
+  cameraOnlyMode: 0
   categoryFolder: Letras
   guideSpawnPoint: {fileID: 703977259}
   guideRenderTexture: {fileID: 8400000, guid: c669355ffd3acad25bb41d2a1c513a2e, type: 2}
   rotationSpeed: 0.5
+  forceUnlitGuideMaterials: 1
+  guideTargetSize: 0.6
+  autoFrameGuideCamera: 1
+  guideCameraPadding: 1.25
+  guideCameraBackgroundColor: {r: 0.9529412, g: 0.9607843, b: 0.9764706, a: 1}
   historyFrameCount: 30
+  autoSetupOpenCV: 1
+  udpJsonPort: 5005
+  udpVideoPort: 5006
+  frameReceiver: {fileID: 0}
+  correctConfidenceThreshold: 0.8
+  excellentConfidenceThreshold: 0.8
 --- !u!114 &412892059
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -336,6 +348,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::OpenCVConnector
   currentFingerStates: 0000000000
   currentHandPosition: {x: 0, y: 0}
+  listenPort: 5005
+  listenAddress: 0.0.0.0
+  staleTimeoutSeconds: 0.75
+  handDetected: 0
+  currentLetter: 
+  currentConfidence: 0
 --- !u!1 &703977258
 GameObject:
   m_ObjectHideFlags: 0
@@ -635,7 +653,7 @@ Transform:
   m_GameObject: {fileID: 1143504199}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -20, y: 0, z: 0}
+  m_LocalPosition: {x: -20, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
